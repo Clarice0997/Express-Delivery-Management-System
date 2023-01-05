@@ -4,6 +4,15 @@ import LoginView from '@/views/login/LoginView.vue'
 
 Vue.use(VueRouter)
 
+// 配置路由跳转
+const routerPush = VueRouter.prototype.push
+
+VueRouter.prototype.push = function (location) {
+  return routerPush.call(this, location).catch(err => {
+    console.log(err)
+  })
+}
+
 const routes = [
   {
     path: '/',
@@ -16,8 +25,31 @@ const routes = [
   },
   {
     path: '/home',
-    name: '主页',
-    component: () => import(/* webpackChunkName: "HomeView" */ '@/views/home/HomeView.vue')
+    component: () => import(/* webpackChunkName: "HomeView" */ '@/views/home/HomeView.vue'),
+    meta: {
+      requireAuth: true
+    },
+    children: [
+      {
+        path: '',
+        redirect: 'main'
+      },
+      {
+        path: 'main',
+        name: '主页',
+        component: () => import(/* webpackChunkName: "Home" */ '@/views/home/Home.vue')
+      },
+      {
+        path: 'adminManage',
+        name: '快递员管理',
+        component: () => import(/* webpackChunkName: "adminManage" */ '@/views/adminManage/AdminManage.vue')
+      },
+      {
+        path: 'expressManage',
+        name: '快递管理',
+        component: () => import(/* webpackChunkName: "expressManage" */ '@/views/expressManage/ExpressManage.vue')
+      }
+    ]
   }
 ]
 
