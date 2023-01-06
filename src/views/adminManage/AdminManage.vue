@@ -49,7 +49,7 @@
       </el-table>
       <!-- 分页栏 -->
       <div class="block">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pageNumber" :page-sizes="[5, 10, 15, 20]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalData"> </el-pagination>
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="pageNumber" :page-sizes="[5, 10, 15, 20]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalData"> </el-pagination>
       </div>
     </el-card>
     <!-- 新增弹窗对话框 -->
@@ -214,6 +214,10 @@ export default {
     // 计算数据条数
     totalData() {
       return this.userData.length
+    },
+    // 计算总页数
+    totalPage() {
+      return Math.ceil(this.totalData / this.pageSize)
     }
   },
 
@@ -255,12 +259,14 @@ export default {
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
+      // 赋值页面显示条数
+      this.pageSize = val
       // 显示条数改变重新获取用户数据
       this.getUsersInfoHandler()
     },
     // 页码改变事件
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      this.getUsersInfoHandler()
     },
     // 搜索按钮点击事件
     searchHandler() {
