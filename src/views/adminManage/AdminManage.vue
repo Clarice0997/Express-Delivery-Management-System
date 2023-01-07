@@ -103,6 +103,8 @@ export default {
       pageNumber: 1,
       // 表格条数
       pageSize: 20,
+      // 数据条数
+      totalData: 0,
       // 用户数据源
       userData: [
         // {
@@ -211,10 +213,6 @@ export default {
   },
 
   computed: {
-    // 计算数据条数
-    totalData() {
-      return this.userData.length
-    },
     // 计算总页数
     totalPage() {
       return Math.ceil(this.totalData / this.pageSize)
@@ -266,6 +264,9 @@ export default {
     },
     // 页码改变事件
     handleCurrentChange(val) {
+      // 页码改变
+      this.pageNumber = val
+      // 页码改变改变重新获取用户数据
       this.getUsersInfoHandler()
     },
     // 搜索按钮点击事件
@@ -286,13 +287,21 @@ export default {
                 message: '获取用户信息成功',
                 type: 'success'
               })
+              // 重置数组
               this.userData = []
+              // 赋值用户数组
               this.userData[0] = data.data.data
+              // 数据条数
+              this.totalData = 1
             } else {
               this.$message({
                 message: '获取用户信息失败',
                 type: 'error'
               })
+              // 重置数组
+              this.userData = []
+              // 数据条数
+              this.totalData = 0
             }
           })
           .catch(err => {
@@ -301,6 +310,10 @@ export default {
               message: '获取用户信息失败',
               type: 'error'
             })
+            // 重置数组
+            this.userData = []
+            // 数据条数
+            this.totalData = 0
           })
       }
     },
@@ -318,15 +331,19 @@ export default {
               message: '获取用户信息成功',
               type: 'success'
             })
-            // 重置页码
-            this.pageNumber = 1
             // 持久化数据
             this.userData = data.data.data
+            // 数据条数
+            this.totalData = data.data.count
           } else {
             this.$message({
               message: '获取用户信息失败',
               type: 'error'
             })
+            // 重置数组
+            this.userData = []
+            // 数据条数
+            this.totalData = 0
           }
         })
         .catch(err => {
@@ -335,6 +352,10 @@ export default {
             message: '获取用户信息失败',
             type: 'error'
           })
+          // 重置数组
+          this.userData = []
+          // 数据条数
+          this.totalData = 0
         })
     },
     // 点击关闭对话框按钮点击事件
