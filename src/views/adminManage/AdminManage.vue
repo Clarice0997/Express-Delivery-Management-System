@@ -34,8 +34,8 @@
         <!-- 操作列  -->
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="warning" size="mini" v-if="scope.row.status != 0" @click="handleDisable(scope.$index, scope.row)">禁用</el-button>
-            <el-button type="success" size="mini" v-if="scope.row.status != 1" @click="handleEnable(scope.$index, scope.row)">启用</el-button>
+            <el-button type="warning" size="mini" v-if="scope.row.status != 0" @click="handleStatusChange(scope.$index, scope.row, 0)">禁用</el-button>
+            <el-button type="success" size="mini" v-if="scope.row.status != 1" @click="handleStatusChange(scope.$index, scope.row, 1)">启用</el-button>
             <el-button type="primary" size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
             <el-button type="danger" size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
           </template>
@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { queryCourier, queryCourierById, insertCourier } from '@/apis/adminAPI'
+import { queryCourier, queryCourierById, insertCourier, updateCourierStatus } from '@/apis/adminAPI'
 
 export default {
   name: 'ExpressDeliveryManagementSystemAdminManage',
@@ -235,15 +235,35 @@ export default {
       }
       return ''
     },
-    // 禁用按钮点击事件
-    handleDisable(index, row) {
+    // 状态按钮点击事件
+    handleStatusChange(index, row, status) {
       console.log(index)
       console.log(row)
-    },
-    // 启用按钮点击事件
-    handleEnable(index, row) {
-      console.log(index)
-      console.log(row)
+      console.log(status)
+      updateCourierStatus(row.id, status)
+        .then(({ data }) => {
+          console.log(data)
+          if (data.code === 200) {
+            this.$message({
+              message: '修改快递员状态成功',
+              type: 'success'
+            })
+            // 修改成功后重新请求用户数据
+            this.getUsersInfoHandler()
+          } else {
+            this.$message({
+              message: '修改快递员状态失败',
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: '修改快递员状态失败',
+            type: 'error'
+          })
+        })
     },
     // 修改按钮点击事件
     handleEdit(index, row) {

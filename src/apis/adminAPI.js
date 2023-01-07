@@ -36,3 +36,13 @@ export const insertCourier = function ({ username, password, nickname, phone }) 
     }
   )
 }
+
+/**
+ * 修改快递员状态API
+ * @param {*} id
+ * @param {*} status
+ * @returns
+ */
+export const updateCourierStatus = function (id, status) {
+  return request.put('apis/admin/adminManage/admin/status', { id, status })
+}
