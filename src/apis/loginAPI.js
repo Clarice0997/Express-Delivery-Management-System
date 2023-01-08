@@ -13,3 +13,11 @@ export const loginAPI = function (username, password) {
     password
   })
 }
+
+/**
+ * 获取用户信息接口
+ * @returns
+ */
+export const userInfoAPI = function () {
+  return request.get('system/admin/getInfo')
+}

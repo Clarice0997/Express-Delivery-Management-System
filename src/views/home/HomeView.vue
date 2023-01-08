@@ -12,12 +12,12 @@
           <div class="userInfo">
             <i class="el-icon-user"></i>
           </div>
-          <div class="logout">
+          <div class="logout" @click="clickLogoutHandler">
             <i class="el-icon-switch-button"></i>
           </div>
         </div>
       </el-header>
-      <el-container>
+      <el-container class="body-container">
         <el-aside width="300px">
           <el-menu v-for="(item, index) in menuList" :key="index" :default-active="$route.path" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" router>
             <el-menu-item :index="item.index">
@@ -38,6 +38,9 @@
 </template>
 
 <script>
+import { deleteCookie } from '@/utils/cookie'
+import { deleteToken } from '@/utils/auth'
+
 export default {
   name: 'ExpressDeliveryManagementSystemHomeView',
 
@@ -45,7 +48,14 @@ export default {
     return {
       // 伸缩导航栏图标class
       toggleClass: 'el-icon-s-fold',
-      menuList: [
+      menuList: []
+    }
+  },
+
+  mounted() {
+    // 判断登录用户角色 返回导航栏
+    if (this.$store.state.userInfo.type === 1) {
+      this.menuList = [
         {
           index: '/home/main',
           icon: 'el-icon-s-home',
@@ -62,12 +72,39 @@ export default {
           title: '快递管理'
         }
       ]
+    } else {
+      this.menuList = [
+        {
+          index: '/home/main',
+          icon: 'el-icon-s-home',
+          title: '主页'
+        },
+        {
+          index: '/home/expressDelivery',
+          icon: 'el-icon-folder',
+          title: '快递管理'
+        }
+      ]
     }
   },
 
-  mounted() {},
-
-  methods: {}
+  methods: {
+    clickLogoutHandler() {
+      // 清除登录索引 和 用户信息
+      this.$store.dispatch('resetUser')
+      deleteCookie('userInfo')
+      // 清除Token
+      deleteToken()
+      // 退出登录弹窗
+      this.$message({
+        message: '退出登录成功',
+        type: 'success',
+        duration: 2000
+      })
+      // 跳转登录页
+      this.$router.replace('/login')
+    }
+  }
 }
 </script>
 
@@ -127,6 +164,9 @@ export default {
       color: #c1ff5c;
     }
   }
+}
+.body-container {
+  height: auto;
 }
 .el-aside {
   height: calc(100vh - 60px);

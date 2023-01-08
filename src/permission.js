@@ -1,6 +1,7 @@
 // 导入
 import router from './router'
 import { getToken } from '@/utils/auth'
+import { getCookie } from './utils/cookie'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -35,14 +36,18 @@ router.beforeEach(async (to, from, next) => {
   // 存在Token 设置Vuex登录状态
   if (hasToken) {
     store.dispatch('setLoginIndex', true)
+    // 判断Vuex是否存在用户信息
+    if (Object.keys(store.state.userInfo).length === 0) {
+      store.dispatch('setUserInfo', getCookie('userInfo'))
+    }
   }
 
   // 判断当前要访问页面是否需要登录才能访问
   if (to.matched.some(record => record.meta.requireAuth)) {
     if (hasToken) {
       // 存在Token 路由登录页 直接跳转主页
-      if (to.path.match('/express/login')) {
-        next({ path: '/express/home' })
+      if (to.path.match('/login')) {
+        next({ path: '/home' })
         NProgress.done()
       } else {
         next()
@@ -55,7 +60,7 @@ router.beforeEach(async (to, from, next) => {
         type: 'warning',
         duration: 1000
       })
-      next('/express/login')
+      next('/login')
       NProgress.done()
     }
   } else {

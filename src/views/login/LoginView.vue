@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import { loginAPI } from '@/apis/loginAPI'
+import { loginAPI, userInfoAPI } from '@/apis/loginAPI'
 import { setToken } from '@/utils/auth'
+import { setCookie } from '@/utils/cookie'
 import router from '@/router'
 import store from '@/store'
 
@@ -85,23 +86,55 @@ export default {
           this.btnLoading = true
           // 发起登录网络请求
           loginAPI(this.form.username, this.form.password)
-            .then(({ data }) => {
+            .then(async ({ data }) => {
               if (data.code === 200) {
-                // 成功登录弹窗
-                this.$message({
-                  message: data.message,
-                  type: 'success',
-                  duration: 2000
-                })
                 // 保存Token
                 setToken(data.data.token)
-                // Vuex保存登录索引
-                store.dispatch('setLoginIndex', true)
-                // 登录成功跳转首页
-                router.replace('/home')
+                // 获取用户信息
+                await userInfoAPI()
+                  .then(({ data }) => {
+                    console.log(data)
+                    if (data.code === 200) {
+                      // Vuex保存登录索引
+                      store.dispatch('setLoginIndex', true)
+                      // Vuex保存用户信息
+                      store.dispatch('setUserInfo', data.data.data)
+                      // cookie保存用户信息
+                      setCookie('userInfo', data.data.data)
+                      // 成功登录弹窗
+                      this.$message({
+                        message: data.message,
+                        type: 'success',
+                        duration: 2000
+                      })
+                      // 登录成功跳转首页
+                      router.replace('/home')
+                    } else {
+                      this.$message({
+                        message: '登录失败',
+                        type: 'error',
+                        duration: 2000
+                      })
+                    }
+                  })
+                  .catch(err => {
+                    console.log(err)
+                    this.$message({
+                      message: err,
+                      type: 'error',
+                      duration: 2000
+                    })
+                  })
+              } else if (data.code === 400 && data.data.message === '当前用户不可用') {
+                this.$message({
+                  message: data.data.message,
+                  type: 'error',
+                  duration: 2000
+                })
               }
             })
             .catch(err => {
+              console.log(err)
               this.$message({
                 message: err,
                 type: 'error',

@@ -46,8 +46,13 @@ const routes = [
       },
       {
         path: 'expressManage',
-        name: '快递管理',
+        name: '管理员快递管理',
         component: () => import(/* webpackChunkName: "expressManage" */ '@/views/expressManage/ExpressManage.vue')
+      },
+      {
+        path: 'expressDelivery',
+        name: '快递员快递管理',
+        component: () => import(/* webpackChunkName: "expressDelivery" */ '@/views/expressDelivery/ExpressDelivery.vue')
       }
     ]
   }
