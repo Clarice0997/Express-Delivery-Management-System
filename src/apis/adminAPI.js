@@ -46,3 +46,21 @@ export const insertCourier = function ({ username, password, nickname, phone }) 
 export const updateCourierStatus = function (id, status) {
   return request.put('apis/admin/adminManage/admin/status', { id, status })
 }
+
+/**
+ * 修改快递员信息API
+ * @param {*} form
+ * @returns
+ */
+export const updateCourier = function ({ username, nickname, phone }) {
+  return request.put('apis/admin/adminManage/admin', { username, nickname, phone })
+}
+
+/**
+ * 删除快递员API
+ * @param {*} id
+ * @returns
+ */
+export const deleteCourier = function (id) {
+  return request.delete('apis/admin/adminManage/admin/' + id)
+}

@@ -13,7 +13,7 @@
     <!-- 主体表格区卡片 -->
     <el-card shadow="hover" class="body-card">
       <!-- element表格 用户表格 -->
-      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" :row-class-name="tableRowClassName" height="500" max-height="700" :default-sort="{ prop: 'id', order: 'ascending' }">
+      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" :row-class-name="tableRowClassName" height="600" max-height="600" :default-sort="{ prop: 'id', order: 'ascending' }">
         <!-- ID列 -->
         <el-table-column label="ID" width="120" prop="id" sortable> </el-table-column>
         <!-- 登录名列 -->
@@ -76,11 +76,37 @@
         </div>
       </el-form>
     </el-dialog>
+    <!-- 修改弹窗对话框 -->
+    <el-dialog title="修改人员" :visible.sync="updateDialogVisible" width="30%">
+      <el-form ref="updateForm" :model="updateForm" :rules="updateRules" label-width="80px" size="medium">
+        <el-form-item label="登录名" prop="username">
+          <el-input v-model="updateForm.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="真实姓名" prop="nickname">
+          <el-input v-model="updateForm.nickname" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码" prop="phone">
+          <el-input v-model="updateForm.phone" clearable></el-input>
+        </el-form-item>
+        <div class="buttons-container">
+          <el-button @click="clickUpdateDialogCloseHandler">关闭</el-button>
+          <el-button type="success" @click="clickUpdateConfirmHandler">确认修改</el-button>
+        </div>
+      </el-form>
+    </el-dialog>
+    <!-- 状态变更弹窗对话框 -->
+    <el-dialog :visible.sync="statusDialogVisible" width="30%">
+      <p style="text-align: left; margin-bottom: 10px">是否{{ status ? '启用' : '禁用' }}这个用户?</p>
+      <div class="buttons-container">
+        <el-button type="primary" @click="clickStatusConfirmHandler">确定</el-button>
+        <el-button @click="clickStatusDialogCancleHandler">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { queryCourier, queryCourierById, insertCourier, updateCourierStatus } from '@/apis/adminAPI'
+import { queryCourier, queryCourierById, insertCourier, updateCourierStatus, updateCourier, deleteCourier } from '@/apis/adminAPI'
 
 export default {
   name: 'ExpressDeliveryManagementSystemAdminManage',
@@ -115,9 +141,17 @@ export default {
         //   status: true
         // }
       ],
-      // 对话框显隐
+      // 新增人员对话框显隐
       dialogFormVisible: false,
-      // 表单数据对象
+      // 修改人员对话框显隐
+      updateDialogVisible: false,
+      // 状态变更对话框显隐
+      statusDialogVisible: false,
+      // 状态 1启用状态 0禁用状态
+      status: true,
+      // 当前选中行数据对象
+      row: {},
+      // 新增人员表单数据对象
       form: {
         username: '',
         password: '',
@@ -125,6 +159,14 @@ export default {
         nickname: '',
         phone: ''
       },
+      // 修改人员表单数据对象
+      updateForm: {
+        username: '',
+        nickname: '',
+        phone: ''
+      },
+      //  修改人员表单校验对象
+      updateRules: {},
       // 表单校验对象
       rules: {
         username: [
@@ -237,22 +279,36 @@ export default {
     },
     // 状态按钮点击事件
     handleStatusChange(index, row, status) {
-      console.log(index)
-      console.log(row)
-      console.log(status)
-      updateCourierStatus(row.id, status)
+      this.statusDialogVisible = true
+      this.row = row
+      this.status = Boolean(status)
+    },
+    // 修改按钮点击事件
+    handleEdit(index, row) {
+      // 修改修改人员表单数据对象
+      this.updateForm = {
+        username: row.username,
+        nickname: row.nickname,
+        phone: row.phone
+      }
+      // 显示修改对话框
+      this.updateDialogVisible = true
+    },
+    // 删除按钮点击事件
+    handleDelete(index, row) {
+      deleteCourier(row.id)
         .then(({ data }) => {
           console.log(data)
           if (data.code === 200) {
             this.$message({
-              message: '修改快递员状态成功',
+              message: '删除快递员成功',
               type: 'success'
             })
-            // 修改成功后重新请求用户数据
+            // 删除成功后重新请求用户数据
             this.getUsersInfoHandler()
           } else {
             this.$message({
-              message: '修改快递员状态失败',
+              message: '删除快递员失败',
               type: 'error'
             })
           }
@@ -260,20 +316,10 @@ export default {
         .catch(err => {
           console.log(err)
           this.$message({
-            message: '修改快递员状态失败',
+            message: '删除快递员失败',
             type: 'error'
           })
         })
-    },
-    // 修改按钮点击事件
-    handleEdit(index, row) {
-      console.log(index)
-      console.log(row)
-    },
-    // 删除按钮点击事件
-    handleDelete(index, row) {
-      console.log(index)
-      console.log(row)
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
@@ -340,6 +386,28 @@ export default {
     // 点击新增按钮事件
     clickAddHandler() {
       this.dialogFormVisible = true
+    },
+    // 点击修改对话框关闭按钮事件
+    clickUpdateDialogCloseHandler() {
+      this.updateDialogVisible = false
+    },
+    // 点击修改对话框确认修改按钮事件
+    clickUpdateConfirmHandler() {
+      updateCourier(this.updateForm)
+        .then(({ data }) => {
+          console.log(data)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .finally(() => {
+          // 隐藏对话框
+          this.updateDialogVisible = false
+          // 重置表单数据
+          this.updateForm = this.$options.data().updateForm
+          // 重新获取用户数据
+          this.getUsersInfoHandler()
+        })
     },
     // 发起网络请求获取用户数据函数
     getUsersInfoHandler() {
@@ -418,11 +486,52 @@ export default {
               this.fullscreenLoading = false
               // 重置表单数据
               this.form = this.$options.data().form
+              // 重新请求数据
+              this.getUsersInfoHandler()
             })
         } else {
           return false
         }
       })
+    },
+    // 状态改变对话框取消点击事件
+    clickStatusDialogCancleHandler() {
+      this.statusDialogVisible = false
+    },
+    // 状态改变对话框确认点击事件
+    clickStatusConfirmHandler() {
+      console.log(this.row)
+      console.log(this.status)
+      updateCourierStatus(this.row.id, Number(this.status))
+        .then(({ data }) => {
+          console.log(data)
+          if (data.code === 200) {
+            this.$message({
+              message: '修改快递员状态成功',
+              type: 'success'
+            })
+            // 修改成功后重新请求用户数据
+            this.getUsersInfoHandler()
+          } else {
+            this.$message({
+              message: '修改快递员状态失败',
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: '修改快递员状态失败',
+            type: 'error'
+          })
+        })
+        .finally(() => {
+          // 隐藏对话框
+          this.statusDialogVisible = false
+          // 重置行数据
+          this.row = {}
+        })
     }
   }
 }
