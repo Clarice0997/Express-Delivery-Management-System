@@ -64,3 +64,11 @@ export const updateCourier = function ({ username, nickname, phone }) {
 export const deleteCourier = function (id) {
   return request.delete('apis/admin/adminManage/admin/' + id)
 }
+
+/**
+ * 获取所有在岗快递员
+ * @returns
+ */
+export const getAvaliableCourier = function () {
+  return request.get('apis/admin/adminManage/admin/avaliableCourier')
+}

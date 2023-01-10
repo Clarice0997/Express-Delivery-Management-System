@@ -4,7 +4,7 @@
       <el-header>
         <div class="logo-container">
           <h3>快递管理系统</h3>
-          <div class="toggle-container">
+          <div class="toggle-container" @click="toggleClick">
             <i :class="toggleClass"></i>
           </div>
         </div>
@@ -18,7 +18,7 @@
         </div>
       </el-header>
       <el-container class="body-container">
-        <el-aside width="300px">
+        <el-aside :width="asideWidth">
           <el-menu v-for="(item, index) in menuList" :key="index" :default-active="$route.path" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" router>
             <el-menu-item :index="item.index">
               <i :class="item.icon"></i>
@@ -48,7 +48,9 @@ export default {
     return {
       // 伸缩导航栏图标class
       toggleClass: 'el-icon-s-fold',
-      menuList: []
+      menuList: [],
+      toggleIndex: false,
+      asideWidth: '300px'
     }
   },
 
@@ -80,7 +82,7 @@ export default {
           title: '主页'
         },
         {
-          index: '/home/expressDelivery',
+          index: '/home/expressManage',
           icon: 'el-icon-folder',
           title: '快递管理'
         }
@@ -103,6 +105,18 @@ export default {
       })
       // 跳转登录页
       this.$router.replace('/login')
+    },
+    // 收缩导航栏按钮点击事件
+    toggleClick() {
+      if (this.toggleIndex) {
+        this.toggleIndex = false
+        this.asideWidth = '300px'
+        this.toggleClass = 'el-icon-s-fold'
+      } else {
+        this.toggleIndex = true
+        this.asideWidth = '0px'
+        this.toggleClass = 'el-icon-s-unfold'
+      }
     }
   }
 }
@@ -169,6 +183,7 @@ export default {
   height: auto;
 }
 .el-aside {
+  transition: 0.5s;
   height: calc(100vh - 60px);
   background-color: #545c64;
   .el-menu {

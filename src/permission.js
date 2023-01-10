@@ -64,6 +64,16 @@ router.beforeEach(async (to, from, next) => {
       NProgress.done()
     }
   } else {
+    if (hasToken) {
+      // 存在Token 路由登录页 直接跳转主页
+      if (to.path.match('/login')) {
+        next({ path: '/home' })
+        NProgress.done()
+      } else {
+        next()
+        NProgress.done()
+      }
+    }
     // 如果路由地址不用校验则放行
     next()
     NProgress.done()
